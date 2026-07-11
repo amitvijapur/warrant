@@ -5,9 +5,9 @@ import { fail, messageOf, ok } from "../_http";
 export const dynamic = "force-dynamic";
 
 const Body = z.object({
-  companyId: z.string(),
-  title: z.string(),
-  input: z.string(),
+  companyId: z.string().min(1).max(64),
+  title: z.string().min(1).max(300),
+  input: z.string().min(1).max(12000),
 });
 
 export async function POST(req: Request): Promise<Response> {

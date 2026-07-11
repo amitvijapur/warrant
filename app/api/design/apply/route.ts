@@ -20,7 +20,7 @@ const AiAxes = z.object({
   salienceWeighing: z.number(),
 });
 const Body = z.object({
-  name: z.string().min(1, "a company name is required"),
+  name: z.string().min(1, "a company name is required").max(200),
   workers: z
     .array(
       z.object({

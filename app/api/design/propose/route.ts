@@ -46,8 +46,8 @@ const Proposal = z.object({
 });
 
 const Body = z.object({
-  name: z.string(),
-  needs: z.string(),
+  name: z.string().max(200),
+  needs: z.string().min(1).max(6000),
 });
 
 const SYSTEM = `You design the operating architecture for "warrant", a system that routes work to the

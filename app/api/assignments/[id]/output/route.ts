@@ -4,7 +4,7 @@ import { fail, messageOf, ok } from "../../../_http";
 
 export const dynamic = "force-dynamic";
 
-const Body = z.object({ output: z.string() });
+const Body = z.object({ output: z.string().min(1).max(20000) });
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }): Promise<Response> {
   const { id } = await ctx.params;
