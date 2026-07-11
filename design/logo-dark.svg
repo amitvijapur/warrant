@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 110" width="330" height="110" role="img" aria-label="warrant">
+  <title>warrant — for dark backgrounds</title>
+  <!-- Use ON dark backgrounds (e.g. the app icon / document cover): light ink wordmark,
+       the dot keeps its lavender accent. -->
+  <text x="4" y="80" font-family="Cormorant, Georgia, 'Times New Roman', serif"
+        font-style="italic" font-weight="600" font-size="88" fill="#FFFFFF"
+        letter-spacing="-1">warrant</text>
+  <circle cx="300" cy="30" r="8.5" fill="#8B7FE8"/>
+</svg>

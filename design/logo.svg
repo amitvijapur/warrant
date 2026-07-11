@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 110" width="330" height="110" role="img" aria-label="warrant">
+  <title>warrant</title>
+  <!-- Primary wordmark. Set in an elegant serif italic (Cormorant, substituting the
+       licensed Panagram Signature Italic). The dot is the brand motif: the decision
+       point / orchestration node / human in the loop. Replace with outlined Panagram
+       paths once the typeface is licensed. -->
+  <text x="4" y="80" font-family="Cormorant, Georgia, 'Times New Roman', serif"
+        font-style="italic" font-weight="600" font-size="88" fill="#111111"
+        letter-spacing="-1">warrant</text>
+  <circle cx="300" cy="30" r="8.5" fill="#8B7FE8"/>
+</svg>

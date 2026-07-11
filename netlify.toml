@@ -1,0 +1,17 @@
+# Netlify deployment config for warrant (Next.js 16 App Router).
+# The Next.js Runtime (OpenNext adapter) is auto-detected, but we declare it
+# explicitly so the build is deterministic. Server route handlers under app/api
+# run as Netlify Functions; all secrets (Supabase service-role key, OpenAI key,
+# approval signing secret, Langfuse keys) must be set in the Netlify site's
+# environment variables — never committed, never NEXT_PUBLIC_-prefixed.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # Next 16 requires a modern Node; pin it so local and CI match.
+  NODE_VERSION = "20"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

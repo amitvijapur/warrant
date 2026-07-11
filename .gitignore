@@ -1,0 +1,13 @@
+node_modules/
+.next/
+.env*
+!.env.example
+.DS_Store
+.vercel
+.netlify
+.omc/
+*.tsbuildinfo
+next-env.d.ts
+
+# QC artifact
+engine-review-output.md

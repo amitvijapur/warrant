@@ -1,0 +1,28 @@
+import { z } from "zod";
+import { confirmOutcome } from "@/lib/pipeline";
+import { fail, messageOf, ok } from "../../../_http";
+
+export const dynamic = "force-dynamic";
+
+const Body = z.object({
+  confirmedPass: z.boolean(),
+  confirmedBy: z.string(),
+});
+
+export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }): Promise<Response> {
+  const { id } = await ctx.params;
+  let raw: unknown;
+  try {
+    raw = await req.json();
+  } catch {
+    return fail("invalid JSON body", 400);
+  }
+  const parsed = Body.safeParse(raw);
+  if (!parsed.success) return fail(parsed.error.message, 400);
+  try {
+    const result = await confirmOutcome(id, parsed.data.confirmedPass, parsed.data.confirmedBy);
+    return ok(result);
+  } catch (err) {
+    return fail(messageOf(err));
+  }
+}
