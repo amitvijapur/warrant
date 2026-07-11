@@ -13,6 +13,7 @@ import { Badge } from "./_components/badge";
 import { Textarea } from "./_components/field";
 import { Stage } from "./_components/stage";
 import { ScoreBreakdown } from "./_components/score-breakdown";
+import { DecisionPath } from "./_components/decision-path";
 import { GateBanner } from "./_components/gate";
 import { ReputationPanel } from "./_components/reputation-panel";
 import { fmt2, fmtMs, fmtUSD, modeLabel, triggerMeta } from "./_components/format";
@@ -317,6 +318,7 @@ export default function Overview() {
   const executeNode = outcome ? "done" : execStatus === "gate_required" ? "gate" : "active";
   const confirmNode = confirmedPass !== null ? "done" : "active";
   const trig = allocation ? triggerMeta(allocation.trigger) : null;
+  const chosenType = meta.data?.types.find((t) => t.id === classification?.taskTypeId) ?? null;
 
   const trace = (
     <ol className="relative">
@@ -363,6 +365,18 @@ export default function Overview() {
                 {trig ? ` · ${trig.gloss}` : ""}
               </p>
             </div>
+            {chosenType && (
+              <div className="space-y-2">
+                <SectionLabel>Decision path</SectionLabel>
+                <DecisionPath
+                  trigger={allocation.trigger}
+                  mode={allocation.mode}
+                  reversibility={classification?.reversibility ?? chosenType.reversibility}
+                  humanAxes={chosenType.requiredHumanAxes}
+                  aiAxes={chosenType.requiredAiAxes}
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <SectionLabel>Score breakdown</SectionLabel>
               <ScoreBreakdown scores={allocation.scores} chosenId={allocation.workerId} workerName={workerName} />

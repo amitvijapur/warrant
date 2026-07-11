@@ -155,10 +155,13 @@ export const api = {
       json({ confirmedPass, confirmedBy }),
     ),
 
-  // ── Design: propose a tailored workforce, then persist it ─────────────────
-  proposeDesign: (name: string, needs: string) =>
-    request<DesignProposal>("/api/design/propose", json({ name, needs })),
+  // ── Design: propose additions to a company's network, then persist them ───
+  proposeDesign: (companyId: string, needs: string) =>
+    request<DesignProposal>("/api/design/propose", json({ companyId, needs })),
 
-  applyDesign: (name: string, workers: ProposedWorker[], taskTypes: ProposedTaskType[]) =>
-    request<{ company: Company }>("/api/design/apply", json({ name, workers, taskTypes })),
+  applyDesign: (companyId: string, workers: ProposedWorker[], taskTypes: ProposedTaskType[]) =>
+    request<{ company: Company; added: { workers: number; taskTypes: number } }>(
+      "/api/design/apply",
+      json({ companyId, workers, taskTypes }),
+    ),
 };

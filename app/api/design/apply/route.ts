@@ -4,8 +4,10 @@ import { fail, messageOf, ok } from "../../_http";
 
 export const dynamic = "force-dynamic";
 
-// Persist a reviewed design proposal as a new company with its workers and task
-// types. The proposal shape mirrors /api/design/propose.
+// Persist a reviewed design proposal onto an EXISTING company: adds the
+// proposed workers and task types that don't already exist there. The
+// proposal shape mirrors /api/design/propose. Idempotent by name (case-
+// insensitive) — re-applying the same proposal never creates duplicates.
 
 const HumanAxes = z.object({
   nuance: z.number(),
@@ -20,7 +22,7 @@ const AiAxes = z.object({
   salienceWeighing: z.number(),
 });
 const Body = z.object({
-  name: z.string().min(1, "a company name is required").max(200),
+  companyId: z.string().min(1).max(64),
   workers: z
     .array(
       z.object({
@@ -58,14 +60,28 @@ export async function POST(req: Request): Promise<Response> {
   }
   const parsed = Body.safeParse(raw);
   if (!parsed.success) return fail(parsed.error.message, 400);
-  const { name, workers, taskTypes } = parsed.data;
+  const { companyId, workers, taskTypes } = parsed.data;
 
   try {
-    const company = await repos.company.create({ name });
+    const company = await repos.company.get(companyId);
+    if (!company) return fail(`company not found: ${companyId}`, 404);
+
+    const [existingWorkers, existingTaskTypes] = await Promise.all([
+      repos.worker.list(companyId),
+      repos.taskType.list(companyId),
+    ]);
+    const existingWorkerNames = new Set(existingWorkers.map((w) => w.name.trim().toLowerCase()));
+    const existingTaskTypeNames = new Set(
+      existingTaskTypes.map((t) => t.name.trim().toLowerCase()),
+    );
+
+    let workersAdded = 0;
     for (const w of workers) {
+      const key = w.name.trim().toLowerCase();
+      if (existingWorkerNames.has(key)) continue;
       const isAgent = w.kind === "agent";
       await repos.worker.create({
-        companyId: company.id,
+        companyId,
         kind: w.kind,
         name: w.name,
         provider: isAgent ? w.provider || "openai" : null,
@@ -76,10 +92,16 @@ export async function POST(req: Request): Promise<Response> {
         typicalLatencySec: w.typicalLatencySec,
         active: true,
       });
+      existingWorkerNames.add(key);
+      workersAdded++;
     }
+
+    let taskTypesAdded = 0;
     for (const t of taskTypes) {
+      const key = t.name.trim().toLowerCase();
+      if (existingTaskTypeNames.has(key)) continue;
       await repos.taskType.create({
-        companyId: company.id,
+        companyId,
         name: t.name,
         description: t.description,
         reversibility: t.reversibility,
@@ -87,8 +109,11 @@ export async function POST(req: Request): Promise<Response> {
         requiredAiAxes: t.requiredAiAxes,
         acceptanceCriteria: t.acceptanceCriteria,
       });
+      existingTaskTypeNames.add(key);
+      taskTypesAdded++;
     }
-    return ok({ company });
+
+    return ok({ company, added: { workers: workersAdded, taskTypes: taskTypesAdded } });
   } catch (err) {
     return fail(messageOf(err));
   }
