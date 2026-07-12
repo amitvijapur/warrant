@@ -301,6 +301,23 @@ export async function executeTask(
 
   recordTelemetry(task, worker, resolvedPrompt, result.text, result.usage);
 
+  // Netlify Functions (and serverless generally) freeze or tear down the
+  // process as soon as this function resolves — before the Langfuse SDK's
+  // background batch timer (default flushInterval ~10s / flushAt ~15 events)
+  // would otherwise fire. Without an explicit await here, the trace/generation
+  // events queued by recordTelemetry above are silently dropped and nothing
+  // reaches Langfuse. Awaiting the flush per-execution guarantees delivery.
+  // flushTelemetry() already wraps its own body in try/catch and only warns,
+  // but it's awaited inside a try/catch again here as defense-in-depth: a
+  // sidecar telemetry flush must never be able to throw into or delay-fail
+  // the ExecutionResult this function returns.
+  try {
+    await flushTelemetry();
+  } catch {
+    // Unreachable today (flushTelemetry swallows internally), kept as a
+    // guarantee against that contract changing later.
+  }
+
   return {
     output: result.text,
     latencyMs: result.latencyMs,
